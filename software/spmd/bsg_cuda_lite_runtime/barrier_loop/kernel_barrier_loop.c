@@ -1,4 +1,4 @@
-//This kernel performs a barrier among all tiles in tile group 
+//This kernel performs a barrier among all tiles in tile group N times
 
 #include "bsg_manycore.h"
 #include "bsg_set_tile_x_y.h"
