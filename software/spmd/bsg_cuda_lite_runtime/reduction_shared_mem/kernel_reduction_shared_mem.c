@@ -12,26 +12,35 @@ INIT_TILE_GROUP_BARRIER(r_barrier, c_barrier, 0, bsg_tiles_X-1, 0, bsg_tiles_Y-1
 
 int  __attribute__ ((noinline)) kernel_reduction_shared_mem(int *A, int N) {
 
-	bsg_tile_group_shared_mem (int, sh_A, N);
+	bsg_tile_group_shared_mem(int, sh_A, N);
 
-	for (int iter_x = bsg_x; iter_x < N; iter_x += bsg_tiles_X * bsg_tiles_Y) {
-		bsg_tile_group_shared_store (int, sh_A, (iter_x), A[iter_x]);
-	}
+	bsg_tile_group_shared_store (int, sh_A, bsg_id, A[bsg_id]);
 
 	bsg_tile_group_barrier(&r_barrier, &c_barrier);
 
-	int sum = 0;
-	for (int iter_x = bsg_x; iter_x < N; iter_x += bsg_tiles_X * bsg_tiles_Y) {
-		int lc_A;
-		bsg_tile_group_shared_load (int, sh_A, (iter_x), lc_A);
-		sum += lc_A;
+	int offset = 1;
+	int mult = 2;
+
+	while (offset < N) {
+		if (!(bsg_id % mult)){
+			int lc_A, lc_B;
+
+			bsg_tile_group_shared_load (int, sh_A, bsg_id, lc_A);
+			bsg_tile_group_shared_load (int, sh_A, bsg_id + offset, lc_B);
+
+			bsg_tile_group_shared_store (int, sh_A, bsg_id, lc_A + lc_B);
+		}
+
+		bsg_tile_group_barrier (&r_barrier, &c_barrier);
+
+		mult *= 2;
+		offset *= 2;
 	}
-	
-	bsg_tile_group_barrier(&r_barrier, &c_barrier);
 
-	A[0] = sum;
+	if (bsg_id == 0)
+		bsg_tile_group_shared_load(int, sh_A, 0, A[0]);
 
-	bsg_tile_group_barrier(&r_barrier, &c_barrier); 
+	bsg_tile_group_barrier (&r_barrier, &c_barrier);
 
   return 0;
 }
