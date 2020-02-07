@@ -12,9 +12,23 @@ INIT_TILE_GROUP_BARRIER(r_barrier, c_barrier, 0, bsg_tiles_X-1, 0, bsg_tiles_Y-1
 
 int  __attribute__ ((noinline)) kernel_reduction_shared_mem(int *A, int N) {
 
+	bsg_tile_group_shared_mem (int, sh_A, N);
+
+	for (int iter_x = bsg_x; iter_x < N; iter_x += bsg_tiles_X * bsg_tiles_Y) {
+		bsg_tile_group_shared_store (int, sh_A, (iter_x), A[iter_x]);
+	}
+
+	bsg_tile_group_barrier(&r_barrier, &c_barrier);
+
 	int sum = 0;
-	for (int i = 0; i < N; i ++) 
-		sum += A[i];
+	for (int iter_x = bsg_x; iter_x < N; iter_x += bsg_tiles_X * bsg_tiles_Y) {
+		int lc_A;
+		bsg_tile_group_shared_load (int, sh_A, (iter_x), lc_A);
+		sum += lc_A;
+	}
+	
+	bsg_tile_group_barrier(&r_barrier, &c_barrier);
+
 	A[0] = sum;
 
 	bsg_tile_group_barrier(&r_barrier, &c_barrier); 
