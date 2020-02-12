@@ -13,13 +13,14 @@ INIT_TILE_GROUP_BARRIER(r_barrier, c_barrier, 0, bsg_tiles_X-1, 0, bsg_tiles_Y-1
 int  __attribute__ ((noinline)) kernel_barrier_loop(int N) {
 
 	bsg_cuda_print_stat_kernel_start();
+	bsg_cuda_print_stat_start(1);
 
 	for (int i = 0; i < N; i ++) {
-		bsg_cuda_print_stat_start(1);
+
 		bsg_tile_group_barrier(&r_barrier, &c_barrier);
-		bsg_cuda_print_stat_end(1);
 	}
 
+	bsg_cuda_print_stat_end(1);
 	bsg_cuda_print_stat_kernel_end();
 
 return 0;

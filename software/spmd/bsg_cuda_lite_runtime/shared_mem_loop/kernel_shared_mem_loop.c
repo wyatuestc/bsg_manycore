@@ -17,28 +17,23 @@ int  __attribute__ ((noinline)) kernel_shared_mem_loop(int N) {
 	bsg_tile_group_shared_mem (int, sh_A, N);
         int local_A [N];
 
+	bsg_cuda_print_stat_start(1);
 	// Load entire shared memory into local memory
 	for (int i = 0; i < N; i ++) {
-		bsg_cuda_print_stat_start(1);
-
 		bsg_tile_group_shared_load (int, sh_A, i, local_A[i]);
-
-		bsg_cuda_print_stat_end(1);
 	}
+	bsg_cuda_print_stat_end(1);
 
 
 	bsg_tile_group_barrier(&r_barrier, &c_barrier);
 
 
+	bsg_cuda_print_stat_start(2);
 	// Store entire local memory back into shared memory
 	for (int i = 0; i < N; i ++) {
-		bsg_cuda_print_stat_start(2);
-
 		bsg_tile_group_shared_store (int, sh_A, i, local_A[i]);
-
-		bsg_cuda_print_stat_end(2);
 	}
-
+	bsg_cuda_print_stat_end(2);
 
 	bsg_cuda_print_stat_kernel_end();
 
