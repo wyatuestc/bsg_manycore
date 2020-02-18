@@ -190,7 +190,7 @@ class BloodGraph:
                                              "bubble_icache"                          : (0x00, 0x00, 0xff), ## blue
 
                                              "bubble_branch_mispredict"               : (0x80, 0x00, 0x80), ## purple
-                                             "bubble_jalr_mispredict"                 : (0xff, 0xa5, 0x00), ## maroon
+                                             "bubble_jalr_mispredict"                 : (0xff, 0xa5, 0x00), ## orange
                                              "bubble_fp_op"                           : (0x00, 0x00, 0x00), ## black
                                              "bubble"                                 : (0x80, 0x00, 0x00), ## maroon
 
