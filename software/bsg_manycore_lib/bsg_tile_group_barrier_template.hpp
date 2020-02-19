@@ -28,14 +28,6 @@
 #ifndef  BSG_TILE_GROUP_BARRIER_TEMPLATE_H_
 #define  BSG_TILE_GROUP_BARRIER_TEMPLATE_H_
 
-#ifndef  BSG_TILE_GROUP_X_DIM
-#error   Please define BSG_TILE_GROUP_X_DIM before including bsg_tile_group_barrier.h
-#endif
-
-#ifndef  BSG_TILE_GROUP_Y_DIM
-#error   Please define BSG_TILE_GROUP_Y_DIM before including bsg_tile_group_barrier.h
-#endif
-
 //we need the global bsg_x,bsg_y value.
 #include "bsg_set_tile_x_y.h"
 #include "bsg_manycore.h"
