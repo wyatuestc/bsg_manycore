@@ -285,41 +285,6 @@ public:
 
 
 
-//------------------------------------------------------------------
-// 1. send the sync singal to the center tile of the row
-//    executed by all tiles in the group.
-template <int BARRIER_X_DIM>
-void inline bsg_row_barrier_sync(bsg_row_barrier<BARRIER_X_DIM> * p_row_b, int center_x_cord ){
-        int  i;
-        bsg_row_barrier<BARRIER_X_DIM> * p_remote_barrier = (bsg_row_barrier<BARRIER_X_DIM> *) bsg_remote_ptr( center_x_cord,    \
-                                                                                                               bsg_y        ,    \
-                                                                                                               p_row_b);
-        //write to the corresponding done
-        p_remote_barrier->_done_list[ bsg_x - p_row_b-> _x_cord_start] = 1; 
-}
-
-
-//------------------------------------------------------------------
-//2. wait row sync'ed and send sync singal to center tile of the column
-//   executed only by the tiles at the center of the row 
-template <int BARRIER_Y_DIM, int BARRIER_X_DIM>
-void inline bsg_col_barrier_sync( bsg_row_barrier<BARRIER_X_DIM> * p_row_b
-                                     ,bsg_col_barrier<BARRIER_Y_DIM> * p_col_b
-                                     ,int center_x_cord, int center_y_cord ){
-        int i;
-        bsg_col_barrier<BARRIER_Y_DIM> * p_remote_barrier = (bsg_col_barrier<BARRIER_Y_DIM> *) bsg_remote_ptr( center_x_cord,    \
-                                                                                                               center_y_cord,    \
-                                                                                                               p_col_b);
-        int x_range = p_row_b-> _x_cord_end - p_row_b->_x_cord_start;
-        poll_range( x_range, p_row_b->_done_list);
-        //write to the corresponding done
-        p_remote_barrier->_done_list[ bsg_y - p_col_b-> _y_cord_start] = 1; 
-        #ifdef BSG_BARRIER_DEBUG
-               //addr 0x0: row sync'ed
-               bsg_remote_ptr_io_store( IO_X_INDEX, 0x0, bsg_y);
-        #endif
-}
-
 
 //------------------------------------------------------------------
 //3. wait column sync'ed and send alert singal back to tiles in the column
