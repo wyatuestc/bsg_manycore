@@ -71,6 +71,16 @@ public:
         return *this;
     }; 
 
+
+    // Reinitializes the done_list to zero
+    bsg_row_barrier& reset() {
+        for (int i = 0; i < BARRIER_X_DIM; i ++) {
+            this->_done_list[i] = 0;
+        }
+        return *this;
+    };
+
+
     // send the sync singal to the center tile of the row
     // executed by all tiles in the group.
     // TODO: set center_x_cord and bsg_y as input arguments
@@ -100,6 +110,7 @@ public:
 
     // Poll the entire row barrier done_list until
     // all tiles in row have sent their sync signal
+    // Executed by center tile in the row
     bsg_row_barrier& wait_on_sync() {
         int range = this->_x_cord_end - this->_x_cord_start;
         poll_range( range, this->_done_list);
@@ -142,6 +153,14 @@ public:
     };
 
 
+    // Reinitializes the done_list to zero
+    bsg_col_barrier& reset() {
+        for (int i = 0; i < BARRIER_Y_DIM; i ++) {
+            this->_done_list[i] = 0;
+        }
+        return *this;
+    };
+
     // send the sync singal to the center tile of the column
     // executed by all tiles in the center row
     bsg_col_barrier& sync(int center_y_cord, int center_x_cord ){
@@ -173,6 +192,7 @@ public:
 
     // Poll the entire col barrier done_list until
     // all tiles in row have sent their sync signal
+    // Executed by center tile in column
     bsg_col_barrier& wait_on_sync() {
         int range = this->_y_cord_end - this->_y_cord_start;
         poll_range( range, this->_done_list);
@@ -255,13 +275,16 @@ public:
         r_barrier.sync();
 
         //2. send sync signals to the center of the col
-        if( bsg_x == center_x_cord) 
-                //bsg_col_barrier_sync( &(this->r_barrier), &(this->c_barrier), center_x_cord, center_y_cord );
+        if( bsg_x == center_x_cord) {
                 this->r_barrier.wait_on_sync();
                 this->c_barrier.sync(center_y_cord, center_x_cord);
+        }
         //3. send alert to all tiles of the col
-        if( bsg_x == center_x_cord && bsg_y == center_y_cord) 
-                bsg_col_barrier_alert( &(this->c_barrier) );
+        if( bsg_x == center_x_cord && bsg_y == center_y_cord) { 
+                this->c_barrier.wait_on_sync();
+                this->c_barrier.alert();
+                this->c_barrier.reset();
+        }
         //4. send alert to all tiles of the row
         if( bsg_x == center_x_cord)
                 bsg_row_barrier_alert( &(this->r_barrier), &(this->c_barrier) );
@@ -279,34 +302,6 @@ public:
 
 
 
-
-
-
-
-
-
-
-//------------------------------------------------------------------
-//3. wait column sync'ed and send alert singal back to tiles in the column
-//   execute only by the center tile of the group
-template <int BARRIER_Y_DIM>
-void inline bsg_col_barrier_alert(  bsg_col_barrier<BARRIER_Y_DIM> *  p_col_b ) {
-        //the center tile needs to check the status
-        int i;
-        int y_range = p_col_b-> _y_cord_end - p_col_b->_y_cord_start;
-        poll_range(y_range, p_col_b->_done_list);
-        #ifdef BSG_BARRIER_DEBUG
-               //addr 0x4: column sync'ed
-               bsg_remote_ptr_io_store( IO_X_INDEX, 0x4, bsg_y);
-        #endif
-        //write alert signal to all tiles in the column
-        p_col_b->alert();
-        //re-initilized the local column sync array.
-        for( i= 0; i <= y_range; i++) {
-              p_col_b->_done_list[ i ] = 0;
-        }
-
-}
 
 
 //------------------------------------------------------------------
