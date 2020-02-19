@@ -300,41 +300,7 @@ void inline bsg_tile_wait( bsg_row_barrier<BARRIER_X_DIM> * p_row_b){
 }
 
 
-//------------------------------------------------------------------
-//  The main sync funciton
-//------------------------------------------------------------------
-template <int BARRIER_Y_DIM, int BARRIER_X_DIM>
-void bsg_tile_group_barrier( bsg_row_barrier<BARRIER_X_DIM> *p_row_b
-                            ,bsg_col_barrier<BARRIER_Y_DIM> * p_col_b) {
-        int center_x_cord = (p_row_b->_x_cord_start + p_row_b->_x_cord_end)/2;
 
-        int center_y_cord = (p_col_b->_y_cord_start + p_col_b->_y_cord_end)/2;
-
-        #ifdef BSG_BARRIER_DEBUG
-                if( bsg_x == center_x_cord && bsg_y == center_y_cord ){
-                        bsg_print_time();
-                }
-        #endif
-        //1. send sync signals to center of the row 
-        bsg_row_barrier_sync(p_row_b, center_x_cord );
-
-        //2. send sync signals to the center of the col
-        if( bsg_x == center_x_cord) 
-                bsg_col_barrier_sync( p_row_b, p_col_b, center_x_cord, center_y_cord );
-        //3. send alert to all tiles of the col
-        if( bsg_x == center_x_cord && bsg_y == center_y_cord) 
-                bsg_col_barrier_alert( p_col_b);
-        //4. send alert to all tiles of the row
-        if( bsg_x == center_x_cord)
-                bsg_row_barrier_alert(p_row_b, p_col_b);
-        //5. wait the row alert signal
-        bsg_tile_wait( p_row_b );
-        #ifdef BSG_BARRIER_DEBUG
-                if( bsg_x == center_x_cord && bsg_y == center_y_cord ){
-                        bsg_print_time();
-                }
-        #endif
-}
 
 
 //------------------------------------------------------------------
