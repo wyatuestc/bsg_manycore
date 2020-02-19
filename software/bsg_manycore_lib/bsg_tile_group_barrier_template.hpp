@@ -55,6 +55,8 @@ public:
         return *this;
     }; 
 
+    // send the sync singal to the center tile of the row
+    // executed by all tiles in the group.
     bsg_row_barrier& sync () {
         int center_x_cord = (this->_x_cord_start + this->_x_cord_end) / 2;
         bsg_row_barrier<BARRIER_X_DIM> * p_remote_barrier = (bsg_row_barrier<BARRIER_X_DIM> *) bsg_remote_ptr( center_x_cord,    \
@@ -144,10 +146,9 @@ public:
     };
 
 
+    //  The main sync funciton
     bsg_barrier& sync() {
-
         int center_x_cord = (this->r_barrier._x_cord_start + this->r_barrier._x_cord_end) / 2;
-
         int center_y_cord = (this->c_barrier._y_cord_start + this->c_barrier._y_cord_end) / 2;
 
         #ifdef BSG_BARRIER_DEBUG
@@ -155,6 +156,7 @@ public:
                         bsg_print_time();
                 }
         #endif
+
         //1. send sync signals to center of the row 
         r_barrier.sync();
 
