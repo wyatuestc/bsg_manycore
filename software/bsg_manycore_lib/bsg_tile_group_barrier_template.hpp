@@ -55,6 +55,17 @@ public:
         return *this;
     }; 
 
+    bsg_row_barrier& sync () {
+        int center_x_cord = (this->_x_cord_start + this->_x_cord_end) / 2;
+        bsg_row_barrier<BARRIER_X_DIM> * p_remote_barrier = (bsg_row_barrier<BARRIER_X_DIM> *) bsg_remote_ptr( center_x_cord,    \
+                                                                                                               bsg_y        ,    \
+                                                                                                               this);
+        //write to the corresponding done
+        p_remote_barrier->_done_list[ bsg_x - this->_x_cord_start] = 1; 
+        return *this;
+    };
+
+
 };
 
 
@@ -145,7 +156,7 @@ public:
                 }
         #endif
         //1. send sync signals to center of the row 
-        bsg_row_barrier_sync( &(this->r_barrier), center_x_cord );
+        r_barrier.sync();
 
         //2. send sync signals to the center of the col
         if( bsg_x == center_x_cord) 
@@ -199,8 +210,8 @@ template <int BARRIER_X_DIM>
 void inline bsg_row_barrier_sync(bsg_row_barrier<BARRIER_X_DIM> * p_row_b, int center_x_cord ){
         int  i;
         bsg_row_barrier<BARRIER_X_DIM> * p_remote_barrier = (bsg_row_barrier<BARRIER_X_DIM> *) bsg_remote_ptr( center_x_cord,    \
-                                                                                                                bsg_y        ,    \
-                                                                                                                p_row_b);
+                                                                                                               bsg_y        ,    \
+                                                                                                               p_row_b);
         //write to the corresponding done
         p_remote_barrier->_done_list[ bsg_x - p_row_b-> _x_cord_start] = 1; 
 }
