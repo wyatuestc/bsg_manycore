@@ -129,8 +129,8 @@ public:
 template <int BARRIER_Y_DIM, int BARRIER_X_DIM>
 class bsg_barrier {
 public:
-    bsg_barrier_array<BARRIER_X_DIM> r_barrier;
-    bsg_barrier_array<BARRIER_Y_DIM> c_barrier;
+    bsg_row_barrier<BARRIER_X_DIM> r_barrier;
+    bsg_col_barrier<BARRIER_Y_DIM> c_barrier;
 
 
     bsg_barrier ( unsigned char x_cord_start, unsigned char x_cord_end,
