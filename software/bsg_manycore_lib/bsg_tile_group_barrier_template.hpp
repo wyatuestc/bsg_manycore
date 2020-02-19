@@ -68,6 +68,20 @@ public:
     };
 
 
+    // send alert to all of the tiles in the row 
+    bsg_row_barrier& alert (){
+        bsg_row_barrier<BARRIER_X_DIM> * p_remote_barrier;
+        for( int i = this->_x_cord_start; i <= this->_x_cord_end; i ++) {
+               p_remote_barrier = (bsg_row_barrier<BARRIER_X_DIM> *) bsg_remote_ptr( i,        \
+                                                                                     bsg_y,    \
+                                                                                     this);
+               p_remote_barrier->_local_alert = 1;
+        }
+        return *this;
+    }
+
+
+
 };
 
 
@@ -191,10 +205,6 @@ public:
 //a. check if the char array are all non-zeros
 void inline poll_range( int range, unsigned char *p);
 //------------------------------------------------------------------
-//b. send alert to all of the tiles in the row 
-template <int BARRIER_X_DIM>
-void inline alert_row ( bsg_row_barrier<BARRIER_X_DIM> * p_row_b);
-//------------------------------------------------------------------
 //c. send alert to all of the tiles in the col 
 template <int BARRIER_Y_DIM>
 void inline alert_col ( bsg_col_barrier<BARRIER_Y_DIM> * p_col_b);
@@ -280,7 +290,7 @@ void inline bsg_row_barrier_alert( bsg_row_barrier<BARRIER_X_DIM> *  p_row_b
                bsg_remote_ptr_io_store( IO_X_INDEX, 0x8, bsg_y);
         #endif
         //write alert signal to all tiles in the row
-        alert_row( p_row_b);
+        p_row_b->alert();
         //re-initilized the local row sync array.
         for( i= 0; i <= x_range; i++) {
               p_row_b->_done_list[ i ] = 0;
@@ -325,18 +335,6 @@ void inline alert_col( bsg_col_barrier<BARRIER_Y_DIM> * p_col_b){
                p_remote_barrier = (bsg_col_barrier<BARRIER_Y_DIM> *) bsg_remote_ptr( bsg_x,    \
                                                                                      i,        \
                                                                                      p_col_b);
-               p_remote_barrier->_local_alert = 1;
-        }
-}
-
-template <int BARRIER_X_DIM>
-void inline alert_row( bsg_row_barrier<BARRIER_X_DIM> * p_row_b){
-        int i;
-        bsg_row_barrier<BARRIER_X_DIM> * p_remote_barrier;
-        for( i= p_row_b-> _x_cord_start; i <= p_row_b-> _x_cord_end; i++) {
-               p_remote_barrier = (bsg_row_barrier<BARRIER_X_DIM> *) bsg_remote_ptr( i,        \
-                                                                                     bsg_y,    \
-                                                                                     p_row_b);
                p_remote_barrier->_local_alert = 1;
         }
 }
