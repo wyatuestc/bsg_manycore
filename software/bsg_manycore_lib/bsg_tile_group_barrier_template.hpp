@@ -214,37 +214,6 @@ public:
 
 
 
-
-template <int BARRIER_SIZE>
-class bsg_barrier_array {
-public:
-    unsigned char    _cord_start;
-    unsigned char    _cord_end;
-    unsigned char    _done_list[ BARRIER_SIZE ] = {0};
-    unsigned int     _local_alert ;
-
-    bsg_barrier_array (){};
-
-    bsg_barrier_array (unsigned char cord_start ,unsigned char cord_end) {
-        _cord_start = cord_start;
-        _cord_end = cord_end;
-        _local_alert = 0;
-    };
-
-    bsg_barrier_array& init (unsigned char cord_start ,unsigned char cord_end) {
-        _cord_start = cord_start;
-        _cord_end = cord_end;
-        _local_alert = 0;
-        return *this;
-    };
-
-};
- 
-
-
-
-
-
 template <int BARRIER_Y_DIM, int BARRIER_X_DIM>
 class bsg_barrier {
 public:
@@ -279,17 +248,25 @@ public:
                 this->r_barrier.wait_on_sync();
                 this->c_barrier.sync(center_y_cord, center_x_cord);
         }
+
         //3. send alert to all tiles of the col
         if( bsg_x == center_x_cord && bsg_y == center_y_cord) { 
                 this->c_barrier.wait_on_sync();
                 this->c_barrier.alert();
                 this->c_barrier.reset();
         }
+
         //4. send alert to all tiles of the row
-        if( bsg_x == center_x_cord)
-                bsg_row_barrier_alert( &(this->r_barrier), &(this->c_barrier) );
+        if( bsg_x == center_x_cord) {
+                //bsg_row_barrier_alert( &(this->r_barrier), &(this->c_barrier) );
+                this->c_barrier.wait_on_alert();
+                this->r_barrier.alert();
+                this->r_barrier.reset();
+        }
+
         //5. wait the row alert signal
         this->r_barrier.wait_on_alert();
+
         #ifdef BSG_BARRIER_DEBUG
                 if( bsg_x == center_x_cord && bsg_y == center_y_cord ){
                         bsg_print_time();
@@ -298,37 +275,6 @@ public:
         return *this;
     };
 };
-
-
-
-
-
-
-//------------------------------------------------------------------
-//4. wait column alert signal and send alert singal back to all tiles of the row
-//   executed only by the tiles at the center of the row
-template <int BARRIER_Y_DIM, int BARRIER_X_DIM>
-void inline bsg_row_barrier_alert( bsg_row_barrier<BARRIER_X_DIM> *  p_row_b
-                                  ,bsg_col_barrier<BARRIER_Y_DIM> * p_col_b ){
-        int i;
-        int x_range = p_row_b-> _x_cord_end - p_row_b->_x_cord_start;
-        
-        bsg_wait_local_int( (int *) &(p_col_b -> _local_alert),  1);
-
-        #ifdef BSG_BARRIER_DEBUG
-               //addr 0x8: column alerted. Starting to alter tiles in the row
-               bsg_remote_ptr_io_store( IO_X_INDEX, 0x8, bsg_y);
-        #endif
-        //write alert signal to all tiles in the row
-        p_row_b->alert();
-        //re-initilized the local row sync array.
-        for( i= 0; i <= x_range; i++) {
-              p_row_b->_done_list[ i ] = 0;
-        }
-        //clear the column alert signal
-        p_col_b -> _local_alert = 0;
-}
-
 
 
 
