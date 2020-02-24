@@ -52,9 +52,10 @@ void do_histogram_work()
 {
   int local_histogram[32] = {0};
 
-  int start_idx = __bsg_id * 64;
+  int work = N/(bsg_tiles_X * bsg_tiles_Y);
+  int start_idx = __bsg_id * work;
   bsg_printf("%d\n", start_idx);
-  for (int i = 0; i < 64; i++)
+  for (int i = 0; i < work; i++)
   {
     int local_data = data[start_idx+i];
     local_histogram[local_data]++;

@@ -296,7 +296,6 @@ _test22:
   fmv.s.x f0, t0
   fclass.s t0, f0
   bne t0, t1, fail
-
 _test23:
   la t0, float_dmem_arr
   li t1, 0x41200000
@@ -374,7 +373,6 @@ _test27_end:
   lw t5, 0(t3)
   li t4, 0x4476c000
   bne t4, t5, fail
-
 
 pass:
   bsg_asm_finish(IO_X_INDEX, 0)

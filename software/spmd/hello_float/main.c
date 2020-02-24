@@ -26,7 +26,6 @@ int main()
       bsg_printf("sum: %x\n", hex(sum));
     else
       bsg_fail_x(0);
-
     if (hex(prod) == 0x4108a2be)
       bsg_printf("prod: %x\n", hex(prod));
     else 
@@ -34,9 +33,10 @@ int main()
 
     if (hex(diff) == 0x3ed8bc20)
       bsg_printf("diff: %x\n", hex(diff));
-    else
+    else {
+      //bsg_printf("diff failed: %x\n", hex(diff));
       bsg_fail_x(0);
-
+    }
 
     bsg_finish();
   }
