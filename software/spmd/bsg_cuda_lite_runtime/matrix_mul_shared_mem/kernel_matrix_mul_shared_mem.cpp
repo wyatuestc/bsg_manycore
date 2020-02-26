@@ -132,3 +132,7 @@ int  __attribute__ ((noinline)) kernel_matrix_mul_shared_mem(int *A, int *B, int
 extern "C" int __attribute__ ((noinline)) kernel_matrix_mul_shared_mem_2_2 (int *A, int *B, int *C, int M, int N, int P, int block_size_y, int block_size_x) {
 	return kernel_matrix_mul_shared_mem<2,2> (A, B, C, M, N, P, block_size_y, block_size_x);
 }
+
+
+
+//extern "C" const auto& kernel_matrix_mul_shared_mem_2_2 = kernel_matrix_mul_shared_mem<2,2>;
